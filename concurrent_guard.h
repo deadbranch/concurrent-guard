@@ -55,6 +55,9 @@ class concurrent_guard {
             delete reinterpret_cast<T*>(expected & ptrMask);
     }
 public:
+    void unsafe_decrease_counter() {
+        decrease_counter();
+    }
     concurrent_guard() {
         data.store(0, memory_order_release);
     }
