@@ -20,6 +20,8 @@ public:
             host = nullptr;
     }
 
+    cg_shared_ptr(nullptr_t n): host(nullptr) {    }
+
     T* operator->() const {
         return host->operator->();
     }
