@@ -2,6 +2,7 @@
 #include <thread>
 #include <mutex>
 #include "cg_shared_ptr.h"
+#include "unsafe_concurrent_guard.h"
 
 volatile long long i, d, f;
 mutex m;
@@ -10,86 +11,25 @@ class Test {
 public:
     int h = 228;
     Test() {
-        h = rand() % 10;
         ++d;
-        //cout << "()" << endl;
+        cout << "()" << endl;
     }
     ~Test() {
         ++f;
-        //cout << "~()" << endl;
+        cout << "~()" << endl;
     }
     int getA() {
-        return 42;
+        return h;
     }
 };
 
-Test* t;
-
-cg_shared_ptr<Test> dump;
-concurrent_guard<Test> h;
-volatile bool work = true;
-
-void ShowH(cg_shared_ptr<Test> test) {
-    cout << "))) " << test->h << endl;
-}
-
-void reader() {
-    while(work) {
-        auto ptr = h.try_get();
-        if(ptr) {
-            ++i;
-            int a = ptr->h;
-            cout << ptr->h << endl;
-            ShowH(move(ptr));
-        }
-        else {
-            //cout << "-" << endl;
-        }
-    }
-}
-
-void reader2() {
-    while(work) {
-        auto ptr = t;
-        if(ptr) {
-            ++i;
-            int a = ptr->h;
-            cout << ptr->h << endl;
-        }
-        else {
-            ++f;
-            //cout << "-" << endl;
-        }
-    }
-}
-
-void writer() {
-    while(true) {
-        Test* t = new Test();
-        auto ptr = h.try_set(t);
-        if(ptr) {
-            ++d;
-            sleep(1);
-            //cout << "SEEEEEEEEEEEEEEEEEEEEEEEET" << endl;
-        }
-        else {
-            delete t;
-            //cout << "NON SET--------------------------" << endl;
-        }
-
-    }
-}
-
 int main() {
-    i=d=0;
-    t = new Test();
-    thread(writer).detach();
-    thread(reader).detach();
-    thread(reader).detach();
-    thread(reader).detach();
-    sleep(11);
-    work = false;
-    cout << i << " "<< d << " " << f << endl;
+    unsafe_concurrent_guard<Test> guard;
+    guard.try_set_unsafe(new Test());
+    auto ptr = guard.try_get();
+    cout << ptr->h << endl;
+    ptr = nullptr;
+    guard.decrease_unsafe();
     return 0;
 }
 

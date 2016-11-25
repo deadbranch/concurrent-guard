@@ -2,6 +2,7 @@
 #define ccgsp
 
 #include "concurrent_guard.h"
+#include "unsafe_concurrent_guard.h"
 
 
 template <class T>
@@ -12,9 +13,9 @@ public:
         host = nullptr;
     }
 
-
-
     friend class concurrent_guard<T>;
+    friend class unsafe_concurrent_guard<T>;
+
     cg_shared_ptr(concurrent_guard<T>* _host): host(_host) {
         if (!host->try_increase_counter())
             host = nullptr;

@@ -17,11 +17,13 @@ class cg_shared_ptr;
 
 #define ptrMask     0x0000FFFFFFFFFFFF
 #define addValue    0x0001000000000000
+#define addTwoValue 0x0002000000000000
 #define counterMask 0xFFFF000000000000
 #define getCount(value) ((value & counterMask) >> 48)
 
 template <class T>
 class concurrent_guard {
+protected:
     volatile atomic_uintptr_t data;
     bool try_increase_counter() {
         uintptr_t expected;
@@ -55,9 +57,6 @@ class concurrent_guard {
             delete reinterpret_cast<T*>(expected & ptrMask);
     }
 public:
-    void unsafe_decrease_counter() {
-        decrease_counter();
-    }
     concurrent_guard() {
         data.store(0, memory_order_release);
     }
