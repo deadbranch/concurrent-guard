@@ -22,7 +22,7 @@ public:
     }
 
 
-    cg_shared_ptr<T> try_set_and_unsafe(T* pointer) {
+    cg_shared_ptr<T> try_set_and_get_unsafe(T* pointer) {
         cg_shared_ptr<T> result;
         uintptr_t expected;
         uintptr_t desired = reinterpret_cast<uintptr_t>(pointer) + addTwoValue;
